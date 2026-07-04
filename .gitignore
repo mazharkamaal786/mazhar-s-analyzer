@@ -11,6 +11,7 @@ __pycache__/
 
 # Temporary files
 temp.fasta
+temp_pasted.fasta
 *.tmp
 
 # IDE / Editor

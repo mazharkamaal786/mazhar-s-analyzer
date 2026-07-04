@@ -28,8 +28,24 @@ st.markdown("Upload a FASTA file to analyze sequences, detect mutations, and vis
 # ─── Sidebar Settings ─────────────────────────────────────────────────────────
 
 st.sidebar.header("⚙️ Settings")
-uploaded_file = st.sidebar.file_uploader("Upload FASTA file", type=["fasta", "fa", "txt"])
-use_sample = st.sidebar.checkbox("Use sample data", value=True)
+input_method = st.sidebar.radio(
+    "Choose input method:",
+    ["📁 Upload FASTA file", "📋 Paste FASTA sequence", "📂 Use sample data"],
+    index=2
+)
+
+uploaded_file = None
+pasted_fasta = ""
+
+if input_method == "📁 Upload FASTA file":
+    uploaded_file = st.sidebar.file_uploader("Upload FASTA file", type=["fasta", "fa", "txt"])
+elif input_method == "📋 Paste FASTA sequence":
+    pasted_fasta = st.sidebar.text_area(
+        "Paste your FASTA sequence(s) below:",
+        height=200,
+        placeholder=">Sequence_ID\nATGCGTACGTAGCTAGC...\n\n>Another_Sequence\nGCTAGCTAGCATGCATG..."
+    )
+    st.sidebar.caption("💡 Tip: Copy directly from [NCBI Nucleotide](https://www.ncbi.nlm.nih.gov/nuccore/)")
 
 # ─── Data Loading ─────────────────────────────────────────────────────────────
 
@@ -38,8 +54,13 @@ if uploaded_file:
     with open("temp.fasta", "wb") as f:
         f.write(uploaded_file.read())
     records = parse_fasta("temp.fasta")
-    st.sidebar.success(f"✅ Loaded {len(records)} sequences")
-elif use_sample:
+    st.sidebar.success(f"✅ Loaded {len(records)} sequences from file")
+elif pasted_fasta.strip():
+    with open("temp_pasted.fasta", "w") as f:
+        f.write(pasted_fasta)
+    records = parse_fasta("temp_pasted.fasta")
+    st.sidebar.success(f"✅ Loaded {len(records)} sequences from pasted input")
+elif input_method == "📂 Use sample data":
     sample_path = "sample.fasta"
     if os.path.exists(sample_path):
         records = parse_fasta(sample_path)
